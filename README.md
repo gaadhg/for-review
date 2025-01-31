@@ -2,7 +2,7 @@
 
 The project is still in its early stages, but its already somewhat messy.
 
-I tried following the DDD principles so I started modeling the domain in which I should enforce the "business" logic. Things have gotten quite messy, logic has been duplicated a bit and I feel like I'm not doing the going in the right direction so I'll lay down what i've been thinking here:
+I tried following the DDD principles so I started modeling the domain in which I should enforce the "business" logic. Things have gotten quite messy, logic has been duplicated a bit and I feel like I'm not going in the right direction so I'll lay down what i've been thinking here:
 
 To avoid having to deal with database schemas, ORMs and having 2nd struct for representing the data inside the database I tried using `native_db` so I could just serialize the struct using serde.
 
