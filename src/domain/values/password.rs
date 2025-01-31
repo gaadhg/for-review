@@ -1,17 +1,20 @@
-use bcrypt::{non_truncating_hash, non_truncating_hash_with_result, non_truncating_verify, verify, BcryptError};
+use bcrypt::{
+    BcryptError, non_truncating_hash, non_truncating_hash_with_result, non_truncating_verify,
+    verify,
+};
 
 #[derive(Debug)]
 pub enum PasswordError {
     TooLong,
     IncorrectPassword,
-    InternalError
+    Internal,
 }
 
 impl From<BcryptError> for PasswordError {
     fn from(value: BcryptError) -> Self {
         match value {
             BcryptError::Truncation(_) => PasswordError::TooLong,
-            _ => PasswordError::InternalError
+            _ => PasswordError::Internal,
         }
     }
 }
@@ -31,6 +34,7 @@ impl Password {
     }
 
     pub fn change<P: AsRef<[u8]>>(&mut self, new: P) -> Result<(), PasswordError> {
-        Ok(self.0 = non_truncating_hash(new, 10)?)
+        self.0 = non_truncating_hash(new, 10)?;
+        Ok(())
     }
 }

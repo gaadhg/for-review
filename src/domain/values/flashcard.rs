@@ -7,22 +7,27 @@ pub enum FlashcardError {
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Flashcard {
     question: String,
-    answer: String
+    answer: String,
 }
 
 impl Flashcard {
     pub fn new(question: String, answer: String) -> Result<Self, FlashcardError> {
-        if question.len() > 256 { return Err(FlashcardError::QuestionTooLong) }
-        if answer.len() > 512 { return Err(FlashcardError::AnswerTooLong) }
-        Ok(Self {
-            question: question,
-            answer: answer
-        })
+        if question.len() > 256 {
+            return Err(FlashcardError::QuestionTooLong);
+        }
+        if answer.len() > 512 {
+            return Err(FlashcardError::AnswerTooLong);
+        }
+        Ok(Self { question, answer })
     }
 
     pub fn edit(&mut self, question: String, answer: String) -> Result<(), FlashcardError> {
-        if question.len() > 256 { return Err(FlashcardError::QuestionTooLong) }
-        if answer.len() > 512 { return Err(FlashcardError::AnswerTooLong) }
+        if question.len() > 256 {
+            return Err(FlashcardError::QuestionTooLong);
+        }
+        if answer.len() > 512 {
+            return Err(FlashcardError::AnswerTooLong);
+        }
 
         self.question = question;
         self.answer = answer;

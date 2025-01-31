@@ -6,6 +6,4 @@ mod domain;
 // mod infrastructure;
 mod utils;
 
-
-fn main() {
-}
+fn main() {}

@@ -1,15 +1,15 @@
 use super::*;
 
-mod email;
-mod password;
-mod uuid;
-mod flashcard;
 mod color;
+mod email;
+mod flashcard;
+mod password;
 mod subject;
+mod uuid;
 
-pub use email::*;
-pub use password::*;
-pub use uuid::*;
-pub use flashcard::*;
-pub use subject::*;
 pub use color::*;
+pub use email::*;
+pub use flashcard::*;
+pub use password::*;
+pub use subject::*;
+pub use uuid::*;

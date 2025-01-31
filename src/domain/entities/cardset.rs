@@ -2,34 +2,40 @@ use super::*;
 
 #[derive(Debug)]
 pub enum CardsetError {
-    InternalError,
+    Internal,
     IndexOutOfBounds,
     FlashcardError(FlashcardError),
     CardsetNotFound,
-    InvalidName
+    InvalidName,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Cardset {
-    id: UUID,
+    id: UUIDv7,
     name: String,
 
     label: Subject,
-    cards: Vec<Flashcard>
+    pub cards: Vec<Flashcard>,
 }
 
 impl Cardset {
     pub fn new(name: String, label: Subject, cards: Vec<Flashcard>) -> Result<Self, CardsetError> {
-        let Ok(uuid) = UUID::new() else { return Err(CardsetError::InternalError) };
+        let Ok(uuid) = UUIDv7::new() else {
+            return Err(CardsetError::Internal);
+        };
         let result = Self {
             id: uuid,
-            name: name,
-            label: label,
-            cards: cards
+            name,
+            label,
+            cards,
         };
         Ok(result)
     }
-    pub fn update_cardset(&mut self, name: Option<String>, label: Option<Subject>) -> Result<(), CardsetError> {
+    pub fn update_cardset(
+        &mut self,
+        name: Option<String>,
+        label: Option<Subject>,
+    ) -> Result<(), CardsetError> {
         if let Some(name) = name {
             self.name = name;
         }
@@ -41,7 +47,7 @@ impl Cardset {
         Ok(())
     }
 
-    pub fn id(&self) -> &UUID {
+    pub fn id(&self) -> &UUIDv7 {
         &self.id
     }
 
@@ -52,45 +58,10 @@ impl Cardset {
     pub fn label(&self) -> &Subject {
         &self.label
     }
-
-// Cards
-    pub fn add_card(&mut self, question: String, answer: String) -> Result<(), CardsetError> {
-        self.cards.push(Flashcard::new(question, answer)?);
-        Ok(())
-    }
-
-    pub fn remove_at(&mut self, index: usize) -> Result<(), CardsetError> {
-        if index < self.cards.len() {
-            self.cards.remove(index);
-            return Ok(());
-        } else {
-            return Err(CardsetError::IndexOutOfBounds)
-        }
-    }
-
-    pub fn replace_at(&mut self, index: usize, new_card: Flashcard) -> Result<(), CardsetError> {
-        if index < self.cards.len() {
-            self.cards[index] = new_card;
-            return Ok(());
-        } else {
-            return Err(CardsetError::IndexOutOfBounds)
-        }
-    }
-
-    pub fn get_cards(&self) -> &[Flashcard] {
-        &self.cards
-    }
-
-    pub fn get_mut_cards(&mut self) -> &mut [Flashcard] {
-        &mut self.cards
-    }
-
 }
 
 impl From<FlashcardError> for CardsetError {
     fn from(error: FlashcardError) -> Self {
-        match error {
-            _ => CardsetError::FlashcardError(error)
-        }
+        CardsetError::FlashcardError(error)
     }
 }
