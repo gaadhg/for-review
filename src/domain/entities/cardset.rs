@@ -1,54 +1,48 @@
-use super::*;
+use std::error;
 
-#[derive(Debug)]
+use serde::{Deserialize, Serialize};
+use smol_str::{SmolStr, ToSmolStr};
+use thiserror::Error;
+
+use crate::domain::*;
+
+#[derive(Debug, Error)]
 pub enum CardsetError {
-    Internal,
+    #[error("name over 64 characters")]
+    NameTooLong,
+    #[error("flashcard error: `{0}`")]
+    FlashcardError(#[from] FlashcardError),
+    #[error("index out of bounds")]
     IndexOutOfBounds,
-    FlashcardError(FlashcardError),
-    CardsetNotFound,
-    InvalidName,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Cardset {
     id: UUIDv7,
-    name: String,
-
+    name: SmolStr,
     label: Subject,
-    pub cards: Vec<Flashcard>,
+    cards: Vec<Flashcard>,
 }
 
 impl Cardset {
-    pub fn new(name: String, label: Subject, cards: Vec<Flashcard>) -> Result<Self, CardsetError> {
-        let Ok(uuid) = UUIDv7::new() else {
-            return Err(CardsetError::Internal);
-        };
-        let result = Self {
-            id: uuid,
-            name,
+    pub(in crate::domain) fn new(
+        id: UUIDv7,
+        name: &str,
+        label: Subject,
+    ) -> Result<Self, CardsetError> {
+        if name.len() > 64 {
+            return Err(CardsetError::NameTooLong);
+        }
+        Ok(Self {
+            id,
+            name: name.to_smolstr(),
             label,
-            cards,
-        };
-        Ok(result)
-    }
-    pub fn update_cardset(
-        &mut self,
-        name: Option<String>,
-        label: Option<Subject>,
-    ) -> Result<(), CardsetError> {
-        if let Some(name) = name {
-            self.name = name;
-        }
-
-        if let Some(label) = label {
-            self.label = label;
-        }
-
-        Ok(())
+            cards: vec![],
+        })
     }
 
-    pub fn id(&self) -> &UUIDv7 {
-        &self.id
+    pub fn id(&self) -> UUIDv7 {
+        self.id.clone()
     }
 
     pub fn name(&self) -> &str {
@@ -58,10 +52,42 @@ impl Cardset {
     pub fn label(&self) -> &Subject {
         &self.label
     }
-}
+    //
+    pub fn cards(&self) -> &[Flashcard] {
+        &self.cards
+    }
 
-impl From<FlashcardError> for CardsetError {
-    fn from(error: FlashcardError) -> Self {
-        CardsetError::FlashcardError(error)
+    pub fn card(&self, index: usize) -> Result<&Flashcard, CardsetError> {
+        if index < self.cards.len() {
+            return Ok(self.cards.get(index).unwrap());
+        }
+        Err(CardsetError::IndexOutOfBounds)
+    }
+
+    pub fn add_card(&mut self, question: &str, answer: &str) -> Result<usize, CardsetError> {
+        self.cards.push(Flashcard::new(question, answer)?);
+        Ok(self.cards.len() - 1)
+    }
+
+    pub fn edit_card(
+        &mut self,
+        index: usize,
+        question: &str,
+        answer: &str,
+    ) -> Result<usize, CardsetError> {
+        if index < self.cards.len() {
+            self.cards[index] = Flashcard::new(question, answer)?;
+            return Ok(index);
+        }
+
+        Err(CardsetError::IndexOutOfBounds)
+    }
+
+    pub fn remove_card(&mut self, index: usize) -> Result<(), CardsetError> {
+        if index < self.cards.len() {
+            self.cards.remove(index);
+            return Ok(());
+        }
+        Err(CardsetError::IndexOutOfBounds)
     }
 }

@@ -1,23 +1,25 @@
-use core::time;
-
 use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use smol_str::{SmolStr, ToSmolStr};
+use thiserror::Error;
 
-use super::*;
-
-#[derive(Debug)]
+use crate::domain::*;
+#[derive(Debug, Error)]
 pub enum EventError {
+    #[error("name is longer than 64 characters")]
     NameTooLong,
+    #[error("description is longer than 255 characters")]
     DescriptionTooLong,
-    EventNotFound,
-    Internal,
+    #[error("did the clock start to go backwards or?")]
+    InvalidTimestamp,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Event {
     id: UUIDv7,
 
-    name: String,
-    description: String,
+    name: SmolStr,
+    description: SmolStr,
 
     label: Option<Subject>,
 
@@ -25,64 +27,35 @@ pub struct Event {
 }
 
 impl Event {
-    pub fn new(
-        name: String,
-        description: String,
-        time: DateTime<Utc>,
+    pub(in crate::domain) fn new(
+        id: UUIDv7,
+        name: &str,
+        description: &str,
         label: Option<Subject>,
+        timestamp: DateTime<Utc>,
     ) -> Result<Self, EventError> {
         if name.len() > 64 {
             return Err(EventError::NameTooLong);
         }
-        if description.len() > 256 {
+        if description.len() > 255 {
             return Err(EventError::DescriptionTooLong);
         }
-        let Ok(uuid) = UUIDv7::new() else {
-            return Err(EventError::Internal);
-        };
+
+        if timestamp.date_naive() <= Utc::now().date_naive() {
+            return Err(EventError::InvalidTimestamp);
+        }
 
         Ok(Self {
-            id: uuid,
-            name,
-            description,
-            timestamp: time,
+            id,
+            name: name.to_smolstr(),
+            description: description.to_smolstr(),
             label,
+            timestamp,
         })
     }
 
-    pub fn update_event(
-        &mut self,
-        name: Option<String>,
-        description: Option<String>,
-        label: Option<Option<Subject>>,
-        timestamp: Option<DateTime<Utc>>,
-    ) -> Result<(), EventError> {
-        if let Some(name) = name {
-            if name.len() > 64 {
-                return Err(EventError::NameTooLong);
-            }
-            self.name = name;
-        }
-
-        if let Some(description) = description {
-            if description.len() > 256 {
-                return Err(EventError::DescriptionTooLong);
-            }
-            self.description = description;
-        }
-
-        if let Some(label) = label {
-            self.label = label;
-        }
-
-        if let Some(timestamp) = timestamp {
-            self.timestamp = timestamp;
-        }
-        Ok(())
-    }
-
     pub fn id(&self) -> UUIDv7 {
-        self.id
+        self.id.clone()
     }
 
     pub fn name(&self) -> &str {

@@ -1,36 +1,40 @@
-#[derive(Debug)]
+use serde::{Deserialize, Serialize};
+use smol_str::{SmolStr, ToSmolStr};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
 pub enum FlashcardError {
+    #[error("question over 256 characters")]
     QuestionTooLong,
+    #[error("answer over 256 characters")]
     AnswerTooLong,
 }
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct Flashcard {
-    question: String,
-    answer: String,
+    question: SmolStr,
+    answer: SmolStr,
 }
 
 impl Flashcard {
-    pub fn new(question: String, answer: String) -> Result<Self, FlashcardError> {
+    pub(in crate::domain) fn new(question: &str, answer: &str) -> Result<Self, FlashcardError> {
         if question.len() > 256 {
             return Err(FlashcardError::QuestionTooLong);
         }
         if answer.len() > 512 {
             return Err(FlashcardError::AnswerTooLong);
         }
-        Ok(Self { question, answer })
+        Ok(Self {
+            question: question.to_smolstr(),
+            answer: answer.to_smolstr(),
+        })
     }
 
-    pub fn edit(&mut self, question: String, answer: String) -> Result<(), FlashcardError> {
-        if question.len() > 256 {
-            return Err(FlashcardError::QuestionTooLong);
-        }
-        if answer.len() > 512 {
-            return Err(FlashcardError::AnswerTooLong);
-        }
+    pub fn question(&self) -> &str {
+        &self.question
+    }
 
-        self.question = question;
-        self.answer = answer;
-        Ok(())
+    pub fn answer(&self) -> &str {
+        &self.answer
     }
 }

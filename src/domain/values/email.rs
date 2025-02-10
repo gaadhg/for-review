@@ -1,16 +1,18 @@
-use std::cell::LazyCell;
-
 use native_db::{Key, ToKey};
-use once_cell::sync::Lazy;
+use regex_static::{lazy_regex, once_cell::sync::Lazy};
+use smol_str::{SmolStr, ToSmolStr};
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum EmailError {
+    #[error("malformated email")]
     InvalidEmail,
-    Internal,
+    #[error("email too long")]
+    TooLong,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug)]
-pub struct Email(String);
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone)]
+pub struct Email(SmolStr);
 
 // Pazi boje
 static VALIDATOR: Lazy<regex::Regex> = regex_static::lazy_regex!(
@@ -20,7 +22,7 @@ static VALIDATOR: Lazy<regex::Regex> = regex_static::lazy_regex!(
 impl Email {
     pub fn new(input: &str) -> Result<Self, EmailError> {
         if VALIDATOR.is_match(input) {
-            return Ok(Email(input.to_string()));
+            return Ok(Email(input.to_smolstr()));
         }
 
         Err(EmailError::InvalidEmail)
@@ -28,15 +30,6 @@ impl Email {
 
     pub fn as_str(&self) -> &str {
         &self.0
-    }
-
-    pub fn change(&mut self, new_email: &str) -> Result<(), EmailError> {
-        if VALIDATOR.is_match(new_email) {
-            self.0 = new_email.to_string();
-            return Ok(());
-        }
-
-        Err(EmailError::InvalidEmail)
     }
 }
 

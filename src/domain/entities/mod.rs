@@ -1,5 +1,3 @@
-use super::*;
-
 mod cardset;
 mod event;
 mod schedule;

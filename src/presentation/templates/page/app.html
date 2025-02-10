@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% block head %}
+    <meta charset="UTF-8" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Revisal | {% block title %} App {% endblock title %}</title>
+    <script type="module" src="js/lib/turbo.js"></script>
+    <script type="module" src="js/lib/stimulus.min.js"></script>
+    <script src="js/lib/feather.min.js"></script>   
+    {# "@hotwired/hotwire-native-bridge": "https://cdn.jsdelivr.net/npm/@hotwired/hotwire-native-bridge@latest/dist/hotwire-native-bridge.min.js" #}
+    {% endblock head %}
+</head>
+<body>
+    {% block nav %} {% include "component/nav.html" %} {% endblock nav %}
+    
+    {% block content %}
+    <turbo-frame id="content" src="/app/dashboard">
+    </turbo-frame>
+    {% endblock content %}
+
+    <script>
+        feather.replace()
+    </script>
+    <script src="js/controllers/app.js"></script>
+    
+</body>
+</html>

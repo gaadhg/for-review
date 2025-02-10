@@ -1,0 +1,47 @@
+<nav data-controller="navbar">
+	<div id="logo">
+		<img src="#" alt="Logo">
+		<h1>Revisal</h1>
+	</div>
+	<div id="nav">
+		<a href="/app/dashboard" data-turbo-frame="content" data-navbar-target="link" data-action="click->navbar#setActive" class="active">
+			<i data-feather="sun"></i>
+			<span>
+				Home
+			</span>
+		</a>
+		<a href="/app/cards" data-turbo-frame="content" data-navbar-target="link" data-action="click->navbar#setActive">
+			<i data-feather="moon"></i>
+			<span>
+				Cards
+			</span>
+		</a>
+		<a href="/app/calendar" data-turbo-frame="content" data-navbar-target="link" data-action="click->navbar#setActive">
+			<i data-feather="star"></i>
+			<span>
+				Events
+			</span>
+		</a>
+		<a href="/app/schedule" data-turbo-frame="content" data-navbar-target="link" data-action="click->navbar#setActive">
+			<i data-feather="star"></i>
+			<span>
+				Schedule
+			</span>
+		</a>
+		<span class="slider"></span>
+	</div>
+	<div id="profile">
+		<button>
+			<img src="#" alt="Profile Icon">
+		</button>
+	</div>
+</nav>
+
+<script type="module" src="js/controllers/navbar_controller.js"></script>
+<script type="module">
+    import { Application } from "/js/lib/stimulus.min.js";
+    import NavbarController from "/js/controllers/navbar_controller.js";  // Adjust the path to where the file is located
+
+    const application = Application.start();
+    application.register("navbar", NavbarController);  // Register the 'navbar' controller
+  </script>

@@ -1,49 +1,41 @@
-use super::*;
+use serde::{Deserialize, Serialize};
+use smol_str::*;
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Debug, Error)]
 pub enum SubjectError {
+    #[error("name too long")]
     NameTooLong,
 }
 
-#[derive(Clone, Hash, PartialEq, Eq, Debug, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Debug)]
 pub struct Subject {
-    color: Color,
-    subject: String,
+    label: Color,
+    name: SmolStr,
 }
 
 impl Subject {
-    pub fn new(name: String, color: Color) -> Result<Self, SubjectError> {
+    pub(in crate::domain) fn new(name: &str, label: Color) -> Result<Self, SubjectError> {
         if name.len() > 64 {
             return Err(SubjectError::NameTooLong);
         }
         Ok(Self {
-            color,
-            subject: name,
+            label,
+            name: name.to_smolstr(),
         })
     }
 
-    pub fn set_name(&mut self, name: String) -> Result<(), SubjectError> {
-        if name.len() > 64 {
-            return Err(SubjectError::NameTooLong);
-        }
-        self.subject = name;
-        Ok(())
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
-    pub fn set_color(&mut self, color: Color) {
-        self.color = color;
+    pub fn label(&self) -> Color {
+        self.label
     }
-    // pub fn edit<S: Into<String>>(&mut self, name: Option<S>, color: Option<Color>) -> Result<(), SubjectError> {
-    //     let name = name.map(|s| s.into());
+}
 
-    //     if let Some(name) = name {
-    //         if name.len() > 64 { return Err(SubjectError::NameTooLong) }
-    //         self.subject = name;
-    //     }
-
-    //     if let Some(color) = color {
-    //         self.color = color;
-    //     }
-    //     Ok(())
-    // }
+#[derive(Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Debug)]
+pub enum Color {
+    White,
+    Black,
 }

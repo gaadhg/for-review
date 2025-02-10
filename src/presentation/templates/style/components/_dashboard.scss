@@ -1,0 +1,91 @@
+@use 'dashboard/calendar';
+
+main#dashboard {
+    padding-bottom: 5rem;
+    display: grid;
+    gap: 1rem;
+    grid-auto-rows: minmax(150px, auto);
+    grid-auto-flow: row dense;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "schedule"
+      "calendar"
+      "calendar"
+      "calendar"
+      "homework"
+      "events"
+      "cards";
+}
+
+
+@media (min-width: 500px){
+    main#dashboard {
+      grid-template-columns: 1fr 1fr;
+    grid-template-areas: 
+      "calendar calendar"
+      "calendar calendar"
+      "schedule homework"
+      "events cards";
+    }
+  }
+
+
+  @media (min-width: 750px){
+    main#dashboard{
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-areas:
+      "calendar calendar schedule schedule" 
+      "calendar calendar schedule schedule"
+      "calendar calendar events events"
+      "homework homework cards cards"
+      "homework homework cards cards"
+      ;
+     }
+  }
+
+  @media (min-width: 900px){
+    main#dashboard{
+      // grid-auto-rows: minmax(min-content, auto);
+      grid-template-columns: repeat(6, 1fr);
+      grid-template-areas: 
+      "calendar calendar calendar calendar homework homework"
+      "calendar calendar calendar calendar homework homework"
+      "events events schedule schedule schedule schedule"
+      "events events schedule schedule schedule schedule"
+      "cards cards cards cards cards cards"
+      "cards cards cards cards cards cards"
+      ;
+    }
+  }
+
+  main#dashboard > *{
+    grid-area: var(--grid-area);
+    position: relative;
+    color: black;
+    overflow: hidden;
+    border-radius: 10px;
+    text-decoration: none;
+    background-color: white;
+  }
+main#dashboard > * > p{
+  position: absolute;
+  /*max-width: 12ch;*/
+  text-wrap: balance;
+  top: .75rem; 
+  left: .75rem;
+  font-size: .9rem;
+  z-index: 2;
+  
+}
+main#dashboard > * > p.align-right{
+  left: auto;
+  right: .75rem;
+  text-align: right;
+}
+
+.banner{
+  background-color: black !important;
+  border-radius: 10px;
+  display: grid;
+  place-content: center;
+}

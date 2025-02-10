@@ -1,0 +1,30 @@
+$theme: (
+  light: (
+    primary-color: #fff,
+    secondary-color: #eee,
+    accent-color: #AAAFFF,
+    text-primary: #000,
+    text-secondary: #222,
+    background-color: #fff,
+  ),
+  dark: (
+    primary-color: #333,
+    secondary-color: #777,
+    accent-color: #555FFF,
+    text-primary: #fff,
+    text-secondary: #ddd,
+    background-color: #111,
+  )
+);
+
+
+@mixin generate-theme-vars($mode) {
+    @each $key, $value in map-get($theme, $mode) {
+      --#{$key}: #{$value};
+    }
+  }
+
+
+@function theme($color-name) {
+  @return var(--#{$color-name});
+}
